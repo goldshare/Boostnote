@@ -11,10 +11,11 @@
 .control-infoButton-panel
   z-index 200
   margin-top 0px
+  top: 50px
   right 25px
   position absolute
   padding 20px 25px 0 25px
-  width 300px
+  // width 300px
   overflow auto
   background-color $ui-noteList-backgroundColor
   box-shadow 2px 12px 15px 2px rgba(0, 0, 0, 0.1), 2px 1px 50px 2px rgba(0, 0, 0, 0.1)
@@ -32,6 +33,7 @@
 .control-infoButton-panel-trash
   z-index 200
   margin-top 0px
+  top 50px
   right 0px
   position absolute
   padding 20px 25px 0 25px
@@ -136,82 +138,49 @@
 .export--unable
   cursor not-allowed
 
-body[data-theme="dark"]
-  .control-infoButton-panel
-    background-color $ui-dark-noteList-backgroundColor
+apply-theme(theme)
+  body[data-theme={theme}]
+    .control-infoButton-panel
+      background-color get-theme-var(theme, 'noteList-backgroundColor')
 
-  .control-infoButton-panel-trash
-    background-color $ui-dark-noteList-backgroundColor
+    .control-infoButton-panel-trash
+      background-color get-theme-var(theme, 'noteList-backgroundColor')
 
-  .modification-date
-    color $ui-dark-text-color
+    .modification-date
+      color get-theme-var(theme, 'text-color')
 
-  .modification-date-desc
-    color $ui-inactive-text-color
+    .modification-date-desc
+      color $ui-inactive-text-color
 
-  .infoPanel-defaul-count
-    color $ui-dark-text-color
+    .infoPanel-defaul-count
+      color get-theme-var(theme, 'text-color')
 
-  .infoPanel-sub-count
-    color $ui-inactive-text-color
+    .infoPanel-sub-count
+      color $ui-inactive-text-color
 
-  .infoPanel-default
-    color $ui-dark-text-color
+    .infoPanel-default
+      color get-theme-var(theme, 'text-color')
 
-  .infoPanel-sub
-    color $ui-inactive-text-color
+    .infoPanel-sub
+      color $ui-inactive-text-color
 
-  .infoPanel-noteLink
-    background-color alpha($ui-dark-borderColor, 60%)
-    color $ui-dark-text-color
+    .infoPanel-noteLink
+      background-color alpha(get-theme-var(theme, 'borderColor'), 20%)
+      color get-theme-var(theme, 'text-color')
 
-  [id=export-wrap]
-    button
-      color $ui-dark-inactive-text-color
-      &:hover
-        background-color alpha($ui-dark-borderColor, 20%)
-        color $ui-dark-text-color
-    p
-      color $ui-dark-inactive-text-color
-      &:hover
-        color $ui-dark-text-color
+    [id=export-wrap]
+      button
+        color $ui-dark-inactive-text-color
+        &:hover
+          background-color alpha(get-theme-var(theme, 'borderColor'), 20%)
+          color get-theme-var(theme, 'text-color')
+      p
+        color $ui-dark-inactive-text-color
+        &:hover
+          color get-theme-var(theme, 'text-color')
 
-body[data-theme="solarized-dark"]
-  .control-infoButton-panel
-    background-color $ui-solarized-dark-noteList-backgroundColor
+for theme in 'dark' 'solarized-dark' 'dracula'
+  apply-theme(theme)
 
-  .control-infoButton-panel-trash
-    background-color $ui-solarized-ark-noteList-backgroundColor
-
-  .modification-date
-    color $ui-solarized-ark-text-color
-
-  .modification-date-desc
-    color $ui-inactive-text-color
-
-  .infoPanel-defaul-count
-    color $ui-solarized-dark-text-color
-
-  .infoPanel-sub-count
-    color $ui-inactive-text-color
-
-  .infoPanel-default
-    color $ui-solarized-ark-text-color
-
-  .infoPanel-sub
-    color $ui-inactive-text-color
-
-  .infoPanel-noteLink
-    background-color alpha($ui-solarized-dark-borderColor, 20%)
-    color $ui-solarized-dark-text-color
-
-  [id=export-wrap]
-    button
-      color $ui-dark-inactive-text-color
-      &:hover
-        background-color alpha($ui-solarized-dark-borderColor, 20%)
-        color $ui-solarized-ark-text-color
-    p
-      color $ui-dark-inactive-text-color
-      &:hover
-        color $ui-solarized-ark-text-color
+for theme in $themes
+  apply-theme(theme)

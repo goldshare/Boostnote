@@ -36,7 +36,7 @@
   height 34px
   width 20px
   line-height 34px
-  
+
 .search-input
   vertical-align middle
   position relative
@@ -71,7 +71,7 @@
   overflow ellipsis
   cursor pointer
   &:hover
-    background-color $ui-button--hover-backgroundColor 
+    background-color $ui-button--hover-backgroundColor
 
 .search-optionList-item--active
   @extend .search-optionList-item
@@ -133,3 +133,40 @@ body[data-theme="dark"]
       color $ui-dark-button--active-color
   .search-optionList-item-name-surfix
     color $ui-dark-inactive-text-color
+
+apply-theme(theme)
+  body[data-theme={theme}]
+    .root
+      &:hover
+        background-color get-theme-var(theme, 'button--hover-backgroundColor')
+        border-color get-theme-var(theme, 'borderColor')
+
+    .search-input
+      color get-theme-var(theme, 'text-color')
+      background-color transparent
+      border-color get-theme-var(theme, 'borderColor')
+
+    .search-optionList
+      color get-theme-var(theme, 'text-color')
+      border-color get-theme-var(theme, 'borderColor')
+      background-color get-theme-var(theme, 'button-backgroundColor')
+
+    .search-optionList-item
+      &:hover
+        background-color lighten(get-theme-var(theme, 'button--hover-backgroundColor'), 15%)
+
+    .search-optionList-item--active
+      background-color get-theme-var(theme, 'button--active-backgroundColor')
+      color get-theme-var(theme, 'button--active-color')
+      &:hover
+        background-color get-theme-var(theme, 'button--active-backgroundColor')
+        color get-theme-var(theme, 'button--active-color')
+
+    .search-optionList-item-name-surfix
+      color get-theme-var(theme, 'inactive-text-color')
+
+for theme in 'solarized-dark' 'dracula'
+  apply-theme(theme)
+
+for theme in $themes
+  apply-theme(theme)

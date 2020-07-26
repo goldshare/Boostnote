@@ -1,5 +1,4 @@
 import ConfigManager from './ConfigManager'
-import store from 'browser/main/store'
 
 const nodeIpc = require('node-ipc')
 const { remote, ipcRenderer } = require('electron')
@@ -13,16 +12,15 @@ nodeIpc.config.silent = true
 nodeIpc.connectTo(
   'node',
   path.join(app.getPath('userData'), 'boostnote.service'),
-  function () {
-    nodeIpc.of.node.on('error', function (err) {
-      console.log(err)
+  function() {
+    nodeIpc.of.node.on('error', function(err) {
+      console.error(err)
     })
-    nodeIpc.of.node.on('connect', function () {
-      console.log('Connected successfully')
-      ipcRenderer.send('config-renew', {config: ConfigManager.get()})
+    nodeIpc.of.node.on('connect', function() {
+      ipcRenderer.send('config-renew', { config: ConfigManager.get() })
     })
-    nodeIpc.of.node.on('disconnect', function () {
-      console.log('disconnected')
+    nodeIpc.of.node.on('disconnect', function() {
+      return
     })
   }
 )

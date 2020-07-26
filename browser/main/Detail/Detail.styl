@@ -23,10 +23,17 @@ body[data-theme="dark"]
     border-left 1px solid $ui-dark-borderColor
   .empty-message
     color $ui-dark-inactive-text-color
-    
-body[data-theme="solarized-dark"]
-  .root
-    background-color $ui-solarized-dark-noteDetail-backgroundColor
-    border-left 1px solid $ui-solarized-dark-borderColor
-  .empty-message
-    color $ui-solarized-dark-text-color
+
+apply-theme(theme)
+  body[data-theme={theme}]
+    .root
+      background-color get-theme-var(theme, 'noteDetail-backgroundColor')
+      border-left 1px solid get-theme-var(theme, 'borderColor')
+    .empty-message
+      color get-theme-var(theme, 'text-color')
+
+for theme in 'solarized-dark' 'dracula'
+  apply-theme(theme)
+
+for theme in $themes
+  apply-theme(theme)

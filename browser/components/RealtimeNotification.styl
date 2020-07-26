@@ -30,14 +30,20 @@ body[data-theme="dark"]
     &:hover
       color #5CB85C
 
+apply-theme(theme)
+  body[data-theme={theme}]
+    .notification-area
+      background-color none
 
-body[data-theme="solarized-dark"]
-  .notification-area
-    background-color none
+    .notification-link
+      color get-theme-var(theme, 'text-color')
+      border none
+      background-color get-theme-var(theme, 'button-backgroundColor')
+      &:hover
+        color get-theme-var(theme, 'button--hover-color')
 
-  .notification-link
-    color $ui-solarized-dark-text-color
-    border none
-    background-color $ui-solarized-dark-button-backgroundColor
-    &:hover
-      color #5CB85C
+for theme in 'solarized-dark' 'dracula'
+  apply-theme(theme)
+
+for theme in $themes
+  apply-theme(theme)

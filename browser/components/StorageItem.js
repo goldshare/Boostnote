@@ -21,7 +21,9 @@ const FolderIcon = ({ className, color, isActive }) => {
 
 /**
  * @param {boolean} isActive
+ * @param {object} tooltipRef,
  * @param {Function} handleButtonClick
+ * @param {Function} handleMouseEnter
  * @param {Function} handleContextMenu
  * @param {string} folderName
  * @param {string} folderColor
@@ -35,7 +37,9 @@ const FolderIcon = ({ className, color, isActive }) => {
 const StorageItem = ({
   styles,
   isActive,
+  tooltipRef,
   handleButtonClick,
+  handleMouseEnter,
   handleContextMenu,
   folderName,
   folderColor,
@@ -49,6 +53,7 @@ const StorageItem = ({
     <button
       styleName={isActive ? 'folderList-item--active' : 'folderList-item'}
       onClick={handleButtonClick}
+      onMouseEnter={handleMouseEnter}
       onContextMenu={handleContextMenu}
       onDrop={handleDrop}
       onDragEnter={handleDragEnter}
@@ -71,12 +76,13 @@ const StorageItem = ({
           ? _.truncate(folderName, { length: 1, omission: '' })
           : folderName}
       </span>
-      {!isFolded &&
-        _.isNumber(noteCount) && (
-          <span styleName='folderList-item-noteCount'>{noteCount}</span>
-        )}
+      {!isFolded && _.isNumber(noteCount) && (
+        <span styleName='folderList-item-noteCount'>{noteCount}</span>
+      )}
       {isFolded && (
-        <span styleName='folderList-item-tooltip'>{folderName}</span>
+        <span styleName='folderList-item-tooltip' ref={tooltipRef}>
+          {folderName}
+        </span>
       )}
     </button>
   )
@@ -84,7 +90,9 @@ const StorageItem = ({
 
 StorageItem.propTypes = {
   isActive: PropTypes.bool.isRequired,
+  tooltipRef: PropTypes.object,
   handleButtonClick: PropTypes.func,
+  handleMouseEnter: PropTypes.func,
   handleContextMenu: PropTypes.func,
   folderName: PropTypes.string.isRequired,
   folderColor: PropTypes.string,

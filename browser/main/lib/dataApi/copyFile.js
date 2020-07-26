@@ -1,5 +1,6 @@
-const fs = require('fs')
-const path = require('path')
+import fs from 'fs'
+import fx from 'fs-extra'
+import path from 'path'
 
 /**
  * @description Copy a file from source to destination
@@ -7,16 +8,17 @@ const path = require('path')
  * @param {String} dstPath
  * @return {Promise} an image path
  */
-function copyFile (srcPath, dstPath) {
+function copyFile(srcPath, dstPath) {
   if (!path.extname(dstPath)) {
     dstPath = path.join(dstPath, path.basename(srcPath))
   }
 
   return new Promise((resolve, reject) => {
     const dstFolder = path.dirname(dstPath)
-    if (!fs.existsSync(dstFolder)) fs.mkdirSync(dstFolder)
 
-    const input = fs.createReadStream(srcPath)
+    fx.ensureDirSync(dstFolder)
+
+    const input = fs.createReadStream(decodeURI(srcPath))
     const output = fs.createWriteStream(dstPath)
 
     output.on('error', reject)

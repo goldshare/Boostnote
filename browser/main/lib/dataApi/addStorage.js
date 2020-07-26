@@ -16,7 +16,7 @@ const CSON = require('@rokt33r/season')
  * 3. fetch notes & folders
  * 4. return `{storage: {...} folders: [folder]}`
  */
-function addStorage (input) {
+function addStorage(input) {
   if (!_.isString(input.path)) {
     return Promise.reject(new Error('Path must be a string.'))
   }
@@ -29,7 +29,7 @@ function addStorage (input) {
     rawStorages = []
   }
   let key = keygen()
-  while (rawStorages.some((storage) => storage.key === key)) {
+  while (rawStorages.some(storage => storage.key === key)) {
     key = keygen()
   }
 
@@ -37,44 +37,48 @@ function addStorage (input) {
     key,
     name: input.name,
     type: input.type,
-    path: input.path
+    path: input.path,
+    isOpen: false
   }
 
   return Promise.resolve(newStorage)
     .then(resolveStorageData)
-    .then(function saveMetadataToLocalStorage (resolvedStorage) {
+    .then(function saveMetadataToLocalStorage(resolvedStorage) {
       newStorage = resolvedStorage
       rawStorages.push({
         key: newStorage.key,
         type: newStorage.type,
         name: newStorage.name,
-        path: newStorage.path
+        path: newStorage.path,
+        isOpen: false
       })
 
       localStorage.setItem('storages', JSON.stringify(rawStorages))
       return newStorage
     })
-    .then(function (storage) {
-      return resolveStorageNotes(storage)
-        .then((notes) => {
-          let unknownCount = 0
-          notes.forEach((note) => {
-            if (!storage.folders.some((folder) => note.folder === folder.key)) {
-              unknownCount++
-              storage.folders.push({
-                key: note.folder,
-                color: consts.FOLDER_COLORS[(unknownCount - 1) % 7],
-                name: 'Unknown ' + unknownCount
-              })
-            }
-          })
-          if (unknownCount > 0) {
-            CSON.writeFileSync(path.join(storage.path, 'boostnote.json'), _.pick(storage, ['folders', 'version']))
+    .then(function(storage) {
+      return resolveStorageNotes(storage).then(notes => {
+        let unknownCount = 0
+        notes.forEach(note => {
+          if (!storage.folders.some(folder => note.folder === folder.key)) {
+            unknownCount++
+            storage.folders.push({
+              key: note.folder,
+              color: consts.FOLDER_COLORS[(unknownCount - 1) % 7],
+              name: 'Unknown ' + unknownCount
+            })
           }
-          return notes
         })
+        if (unknownCount > 0) {
+          CSON.writeFileSync(
+            path.join(storage.path, 'boostnote.json'),
+            _.pick(storage, ['folders', 'version'])
+          )
+        }
+        return notes
+      })
     })
-    .then(function returnValue (notes) {
+    .then(function returnValue(notes) {
       return {
         storage: newStorage,
         notes

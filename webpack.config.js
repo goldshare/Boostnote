@@ -12,7 +12,8 @@ var config = Object.assign({}, skeleton, {
       {
         test: /\.styl$/,
         exclude: /(node_modules|bower_components)/,
-        loader: 'style!css?modules&importLoaders=1&localIdentName=[name]__[local]___[path]!stylus?sourceMap'
+        loader:
+          'style!css?modules&importLoaders=1&localIdentName=[name]__[local]___[path]!stylus?sourceMap'
       },
       {
         test: /\.json$/,
@@ -28,8 +29,14 @@ var config = Object.assign({}, skeleton, {
     publicPath: 'http://localhost:8080/assets/'
   },
   debug: true,
-  devtool: 'cheap-module-eval-source-map'
+  devtool: 'cheap-module-eval-source-map',
+  devServer: {
+    port: 8080,
+    hot: true,
+    inline: true,
+    quiet: false,
+    publicPath: 'http://localhost:8080/assets/'
+  }
 })
 
 module.exports = config
-

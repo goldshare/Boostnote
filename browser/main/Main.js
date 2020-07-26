@@ -12,16 +12,19 @@ import _ from 'lodash'
 import ConfigManager from 'browser/main/lib/ConfigManager'
 import mobileAnalytics from 'browser/main/lib/AwsMobileAnalyticsConfig'
 import eventEmitter from 'browser/main/lib/eventEmitter'
-import { hashHistory } from 'react-router'
-import store from 'browser/main/store'
+import { store } from 'browser/main/store'
 import i18n from 'browser/lib/i18n'
+import { getLocales } from 'browser/lib/Languages'
+import applyShortcuts from 'browser/main/lib/shortcutManager'
+import { chooseTheme, applyTheme } from 'browser/main/lib/ThemeManager'
+import { push } from 'connected-react-router'
+
 const path = require('path')
 const electron = require('electron')
 const { remote } = electron
 
 class Main extends React.Component {
-
-  constructor (props) {
+  constructor(props) {
     super(props)
 
     if (process.env.NODE_ENV === 'production') {
@@ -43,7 +46,7 @@ class Main extends React.Component {
     this.toggleFullScreen = () => this.handleFullScreenButton()
   }
 
-  getChildContext () {
+  getChildContext() {
     const { status, config } = this.props
 
     return {
@@ -52,16 +55,16 @@ class Main extends React.Component {
     }
   }
 
-  init () {
+  init() {
     dataApi
       .addStorage({
-        name: 'My Storage',
+        name: 'My Storage Location',
         path: path.join(remote.app.getPath('home'), 'Boostnote')
       })
-      .then((data) => {
+      .then(data => {
         return data
       })
-      .then((data) => {
+      .then(data => {
         if (data.storage.folders[0] != null) {
           return data
         } else {
@@ -70,7 +73,7 @@ class Main extends React.Component {
               color: '#1278BD',
               name: 'Default'
             })
-            .then((_data) => {
+            .then(_data => {
               return {
                 storage: _data.storage,
                 notes: data.notes
@@ -78,8 +81,7 @@ class Main extends React.Component {
             })
         }
       })
-      .then((data) => {
-        console.log(data)
+      .then(data => {
         store.dispatch({
           type: 'ADD_STORAGE',
           storage: data.storage,
@@ -91,21 +93,26 @@ class Main extends React.Component {
             type: 'SNIPPET_NOTE',
             folder: data.storage.folders[0].key,
             title: 'Snippet note example',
-            description: 'Snippet note example\nYou can store a series of snippets as a single note, like Gist.',
+            description:
+              'Snippet note example\nYou can store a series of snippets as a single note, like Gist.',
             snippets: [
               {
                 name: 'example.html',
                 mode: 'html',
-                content: '<html>\n<body>\n<h1 id=\'hello\'>Enjoy Boostnote!</h1>\n</body>\n</html>'
+                content:
+                  "<html>\n<body>\n<h1 id='hello'>Enjoy Boostnote!</h1>\n</body>\n</html>",
+                linesHighlighted: []
               },
               {
                 name: 'example.js',
                 mode: 'javascript',
-                content: 'var boostnote = document.getElementById(\'enjoy\').innerHTML\n\nconsole.log(boostnote)'
+                content:
+                  "var boostnote = document.getElementById('hello').innerHTML\n\nconsole.log(boostnote)",
+                linesHighlighted: []
               }
             ]
           })
-          .then((note) => {
+          .then(note => {
             store.dispatch({
               type: 'UPDATE_NOTE',
               note: note
@@ -116,9 +123,10 @@ class Main extends React.Component {
             type: 'MARKDOWN_NOTE',
             folder: data.storage.folders[0].key,
             title: 'Welcome to Boostnote!',
-            content: '# Welcome to Boostnote!\n## Click here to edit markdown :wave:\n\n<iframe width="560" height="315" src="https://www.youtube.com/embed/L0qNPLsvmyM" frameborder="0" allowfullscreen></iframe>\n\n## Docs :memo:\n- [Boostnote | Boost your happiness, productivity and creativity.](https://hackernoon.com/boostnote-boost-your-happiness-productivity-and-creativity-315034efeebe)\n- [Cloud Syncing & Backups](https://github.com/BoostIO/Boostnote/wiki/Cloud-Syncing-and-Backup)\n- [How to sync your data across Desktop and Mobile apps](https://github.com/BoostIO/Boostnote/wiki/Sync-Data-Across-Desktop-and-Mobile-apps)\n- [Convert data from **Evernote** to Boostnote.](https://github.com/BoostIO/Boostnote/wiki/Evernote)\n- [Keyboard Shortcuts](https://github.com/BoostIO/Boostnote/wiki/Keyboard-Shortcuts)\n- [Keymaps in Editor mode](https://github.com/BoostIO/Boostnote/wiki/Keymaps-in-Editor-mode)\n- [How to set syntax highlight in Snippet note](https://github.com/BoostIO/Boostnote/wiki/Syntax-Highlighting)\n\n---\n\n## Article Archive :books:\n- [Reddit English](http://bit.ly/2mOJPu7)\n- [Reddit Spanish](https://www.reddit.com/r/boostnote_es/)\n- [Reddit Chinese](https://www.reddit.com/r/boostnote_cn/)\n- [Reddit Japanese](https://www.reddit.com/r/boostnote_jp/)\n\n---\n\n## Community :beers:\n- [GitHub](http://bit.ly/2AWWzkD)\n- [Twitter](http://bit.ly/2z8BUJZ)\n- [Facebook Group](http://bit.ly/2jcca8t)'
+            content:
+              '# Welcome to Boostnote!\n## Click here to edit markdown :wave:\n\n<iframe width="560" height="315" src="https://www.youtube.com/embed/L0qNPLsvmyM" frameborder="0" allowfullscreen></iframe>\n\n## Docs :memo:\n- [Boostnote | Boost your happiness, productivity and creativity.](https://hackernoon.com/boostnote-boost-your-happiness-productivity-and-creativity-315034efeebe)\n- [Cloud Syncing & Backups](https://github.com/BoostIO/Boostnote/wiki/Cloud-Syncing-and-Backup)\n- [How to sync your data across Desktop and Mobile apps](https://github.com/BoostIO/Boostnote/wiki/Sync-Data-Across-Desktop-and-Mobile-apps)\n- [Convert data from **Evernote** to Boostnote.](https://github.com/BoostIO/Boostnote/wiki/Evernote)\n- [Keyboard Shortcuts](https://github.com/BoostIO/Boostnote/wiki/Keyboard-Shortcuts)\n- [Keymaps in Editor mode](https://github.com/BoostIO/Boostnote/wiki/Keymaps-in-Editor-mode)\n- [How to set syntax highlight in Snippet note](https://github.com/BoostIO/Boostnote/wiki/Syntax-Highlighting)\n\n---\n\n## Article Archive :books:\n- [Reddit English](http://bit.ly/2mOJPu7)\n- [Reddit Spanish](https://www.reddit.com/r/boostnote_es/)\n- [Reddit Chinese](https://www.reddit.com/r/boostnote_cn/)\n- [Reddit Japanese](https://www.reddit.com/r/boostnote_jp/)\n\n---\n\n## Community :beers:\n- [GitHub](http://bit.ly/2AWWzkD)\n- [Twitter](http://bit.ly/2z8BUJZ)\n- [Facebook Group](http://bit.ly/2jcca8t)'
           })
-          .then((note) => {
+          .then(note => {
             store.dispatch({
               type: 'UPDATE_NOTE',
               note: note
@@ -129,131 +137,139 @@ class Main extends React.Component {
           .then(defaultMarkdownNote)
           .then(() => data.storage)
       })
-      .then((storage) => {
-        hashHistory.push('/storages/' + storage.key)
+      .then(storage => {
+        store.dispatch(push('/storages/' + storage.key))
       })
-      .catch((err) => {
+      .catch(err => {
         throw err
       })
   }
 
-  componentDidMount () {
+  componentDidMount() {
     const { dispatch, config } = this.props
 
-    if (config.ui.theme === 'dark') {
-      document.body.setAttribute('data-theme', 'dark')
-    } else if (config.ui.theme === 'white') {
-      document.body.setAttribute('data-theme', 'white')
-    } else if (config.ui.theme === 'solarized-dark') {
-      document.body.setAttribute('data-theme', 'solarized-dark')
-    } else {
-      document.body.setAttribute('data-theme', 'default')
-    }
-    if (config.ui.language === 'sq') {
-      i18n.setLocale('sq')
-    } else if (config.ui.language === 'zh-CN') {
-      i18n.setLocale('zh-CN')
-    } else if (config.ui.language === 'zh-TW') {
-      i18n.setLocale('zh-TW')
-    } else if (config.ui.language === 'da') {
-      i18n.setLocale('da')
-    } else if (config.ui.language === 'fr') {
-      i18n.setLocale('fr')
-    } else if (config.ui.language === 'de') {
-      i18n.setLocale('de')
-    } else if (config.ui.language === 'ja') {
-      i18n.setLocale('ja')
-    } else if (config.ui.language === 'ko') {
-      i18n.setLocale('ko')
-    } else if (config.ui.language === 'no') {
-      i18n.setLocale('no')
-    } else if (config.ui.language === 'pl') {
-      i18n.setLocale('pl')
-    } else if (config.ui.language === 'pt') {
-      i18n.setLocale('pt')
-    } else if (config.ui.language === 'ru') {
-      i18n.setLocale('ru')
-    } else if (config.ui.language === 'es') {
-      i18n.setLocale('es')
+    this.refreshTheme = setInterval(() => {
+      const conf = ConfigManager.get()
+      chooseTheme(conf)
+    }, 5 * 1000)
+
+    chooseTheme(config)
+    applyTheme(config.ui.theme)
+
+    if (getLocales().indexOf(config.ui.language) !== -1) {
+      i18n.setLocale(config.ui.language)
     } else {
       i18n.setLocale('en')
     }
-
+    applyShortcuts()
     // Reload all data
-    dataApi.init()
-      .then((data) => {
-        dispatch({
-          type: 'INIT_ALL',
-          storages: data.storages,
-          notes: data.notes
-        })
-
-        if (data.storages.length < 1) {
-          this.init()
-        }
+    dataApi.init().then(data => {
+      dispatch({
+        type: 'INIT_ALL',
+        storages: data.storages,
+        notes: data.notes
       })
 
+      if (data.storages.length < 1) {
+        this.init()
+      }
+    })
+
+    // eslint-disable-next-line no-undef
+    delete CodeMirror.keyMap.emacs['Ctrl-V']
+
     eventEmitter.on('editor:fullscreen', this.toggleFullScreen)
+    eventEmitter.on(
+      'menubar:togglemenubar',
+      this.toggleMenuBarVisible.bind(this)
+    )
+    eventEmitter.on('dispatch:push', this.changeRoutePush.bind(this))
   }
 
-  componentWillUnmount () {
+  componentWillUnmount() {
     eventEmitter.off('editor:fullscreen', this.toggleFullScreen)
+    eventEmitter.off(
+      'menubar:togglemenubar',
+      this.toggleMenuBarVisible.bind(this)
+    )
+    eventEmitter.off('dispatch:push', this.changeRoutePush.bind(this))
+    clearInterval(this.refreshTheme)
   }
 
-  handleLeftSlideMouseDown (e) {
+  changeRoutePush(event, destination) {
+    const { dispatch } = this.props
+    dispatch(push(destination))
+  }
+
+  toggleMenuBarVisible() {
+    const { config } = this.props
+    const { ui } = config
+
+    const newUI = Object.assign(ui, { showMenuBar: !ui.showMenuBar })
+    const newConfig = Object.assign(config, newUI)
+    ConfigManager.set(newConfig)
+  }
+
+  handleLeftSlideMouseDown(e) {
     e.preventDefault()
     this.setState({
       isLeftSliderFocused: true
     })
   }
 
-  handleRightSlideMouseDown (e) {
+  handleRightSlideMouseDown(e) {
     e.preventDefault()
     this.setState({
       isRightSliderFocused: true
     })
   }
 
-  handleMouseUp (e) {
+  handleMouseUp(e) {
     // Change width of NoteList component.
     if (this.state.isRightSliderFocused) {
-      this.setState({
-        isRightSliderFocused: false
-      }, () => {
-        const { dispatch } = this.props
-        const newListWidth = this.state.listWidth
-        // TODO: ConfigManager should dispatch itself.
-        ConfigManager.set({listWidth: newListWidth})
-        dispatch({
-          type: 'SET_LIST_WIDTH',
-          listWidth: newListWidth
-        })
-      })
+      this.setState(
+        {
+          isRightSliderFocused: false
+        },
+        () => {
+          const { dispatch } = this.props
+          const newListWidth = this.state.listWidth
+          // TODO: ConfigManager should dispatch itself.
+          ConfigManager.set({ listWidth: newListWidth })
+          dispatch({
+            type: 'SET_LIST_WIDTH',
+            listWidth: newListWidth
+          })
+        }
+      )
     }
 
     // Change width of SideNav component.
     if (this.state.isLeftSliderFocused) {
-      this.setState({
-        isLeftSliderFocused: false
-      }, () => {
-        const { dispatch } = this.props
-        const navWidth = this.state.navWidth
-        // TODO: ConfigManager should dispatch itself.
-        ConfigManager.set({ navWidth })
-        dispatch({
-          type: 'SET_NAV_WIDTH',
-          navWidth
-        })
-      })
+      this.setState(
+        {
+          isLeftSliderFocused: false
+        },
+        () => {
+          const { dispatch } = this.props
+          const navWidth = this.state.navWidth
+          // TODO: ConfigManager should dispatch itself.
+          ConfigManager.set({ navWidth })
+          dispatch({
+            type: 'SET_NAV_WIDTH',
+            navWidth
+          })
+        }
+      )
     }
   }
 
-  handleMouseMove (e) {
+  handleMouseMove(e) {
     if (this.state.isRightSliderFocused) {
       const offset = this.refs.body.getBoundingClientRect().left
       let newListWidth = e.pageX - offset
-      if (newListWidth < 10) {
-        newListWidth = 10
+      if (newListWidth < 180) {
+        newListWidth = 180
       } else if (newListWidth > 600) {
         newListWidth = 600
       }
@@ -274,7 +290,7 @@ class Main extends React.Component {
     }
   }
 
-  handleFullScreenButton (e) {
+  handleFullScreenButton(e) {
     this.setState({ fullScreen: !this.state.fullScreen }, () => {
       const noteDetail = document.querySelector('.NoteDetail')
       const noteList = document.querySelector('.NoteList')
@@ -288,21 +304,21 @@ class Main extends React.Component {
     })
   }
 
-  hideLeftLists (noteDetail, noteList, mainBody) {
-    this.setState({noteDetailWidth: noteDetail.style.left})
-    this.setState({mainBodyWidth: mainBody.style.left})
+  hideLeftLists(noteDetail, noteList, mainBody) {
+    this.setState({ noteDetailWidth: noteDetail.style.left })
+    this.setState({ mainBodyWidth: mainBody.style.left })
     noteDetail.style.left = '0px'
     mainBody.style.left = '0px'
     noteList.style.display = 'none'
   }
 
-  showLeftLists (noteDetail, noteList, mainBody) {
+  showLeftLists(noteDetail, noteList, mainBody) {
     noteDetail.style.left = this.state.noteDetailWidth
     mainBody.style.left = this.state.mainBodyWidth
     noteList.style.display = 'inline'
   }
 
-  render () {
+  render() {
     const { config } = this.props
 
     // the width of the navigation bar when it is folded/collapsed
@@ -312,64 +328,80 @@ class Main extends React.Component {
       <div
         className='Main'
         styleName='root'
-        onMouseMove={(e) => this.handleMouseMove(e)}
-        onMouseUp={(e) => this.handleMouseUp(e)}
+        onMouseMove={e => this.handleMouseMove(e)}
+        onMouseUp={e => this.handleMouseUp(e)}
       >
         <SideNav
           {..._.pick(this.props, [
             'dispatch',
             'data',
             'config',
+            'match',
             'location'
           ])}
           width={this.state.navWidth}
         />
-        {!config.isSideNavFolded &&
-          <div styleName={this.state.isLeftSliderFocused ? 'slider--active' : 'slider'}
-            style={{left: this.state.navWidth}}
-            onMouseDown={(e) => this.handleLeftSlideMouseDown(e)}
+        {!config.isSideNavFolded && (
+          <div
+            styleName={
+              this.state.isLeftSliderFocused ? 'slider--active' : 'slider'
+            }
+            style={{ left: this.state.navWidth }}
+            onMouseDown={e => this.handleLeftSlideMouseDown(e)}
             draggable='false'
           >
             <div styleName='slider-hitbox' />
           </div>
-        }
-        <div styleName={config.isSideNavFolded ? 'body--expanded' : 'body'}
+        )}
+        <div
+          styleName={config.isSideNavFolded ? 'body--expanded' : 'body'}
           id='main-body'
           ref='body'
-          style={{left: config.isSideNavFolded ? foldedNavigationWidth : this.state.navWidth}}
+          style={{
+            left: config.isSideNavFolded
+              ? foldedNavigationWidth
+              : this.state.navWidth
+          }}
         >
-          <TopBar style={{width: this.state.listWidth}}
+          <TopBar
+            style={{ width: this.state.listWidth }}
             {..._.pick(this.props, [
               'dispatch',
               'config',
               'data',
-              'params',
+              'match',
               'location'
             ])}
           />
-          <NoteList style={{width: this.state.listWidth}}
+          <NoteList
+            style={{ width: this.state.listWidth }}
             {..._.pick(this.props, [
               'dispatch',
               'data',
               'config',
-              'params',
+              'match',
               'location'
             ])}
           />
-          <div styleName={this.state.isRightSliderFocused ? 'slider-right--active' : 'slider-right'}
-            style={{left: this.state.listWidth - 1}}
-            onMouseDown={(e) => this.handleRightSlideMouseDown(e)}
+          <div
+            styleName={
+              this.state.isRightSliderFocused
+                ? 'slider-right--active'
+                : 'slider-right'
+            }
+            style={{ left: this.state.listWidth - 1 }}
+            onMouseDown={e => this.handleRightSlideMouseDown(e)}
             draggable='false'
           >
             <div styleName='slider-hitbox' />
           </div>
           <Detail
-            style={{left: this.state.listWidth}}
+            style={{ left: this.state.listWidth }}
             {..._.pick(this.props, [
               'dispatch',
               'data',
               'config',
-              'params',
+              'match',
               'location'
             ])}
             ignorePreviewPointerEvents={this.state.isRightSliderFocused}
@@ -392,4 +424,4 @@ Main.propTypes = {
   data: PropTypes.shape({}).isRequired
 }
 
-export default connect((x) => x)(CSSModules(Main, styles))
+export default connect(x => x)(CSSModules(Main, styles))

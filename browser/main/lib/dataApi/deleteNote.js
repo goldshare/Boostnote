@@ -1,9 +1,10 @@
 const resolveStorageData = require('./resolveStorageData')
 const path = require('path')
 const sander = require('sander')
+const attachmentManagement = require('./attachmentManagement')
 const { findStorage } = require('browser/lib/findStorage')
 
-function deleteNote (storageKey, noteKey) {
+function deleteNote(storageKey, noteKey) {
   let targetStorage
   try {
     targetStorage = findStorage(storageKey)
@@ -12,7 +13,7 @@ function deleteNote (storageKey, noteKey) {
   }
 
   return resolveStorageData(targetStorage)
-    .then(function deleteNoteFile (storage) {
+    .then(function deleteNoteFile(storage) {
       const notePath = path.join(storage.path, 'notes', noteKey + '.cson')
 
       try {
@@ -24,6 +25,13 @@ function deleteNote (storageKey, noteKey) {
         noteKey,
         storageKey
       }
+    })
+    .then(function deleteAttachments(storageInfo) {
+      attachmentManagement.deleteAttachmentFolder(
+        storageInfo.storageKey,
+        storageInfo.noteKey
+      )
+      return storageInfo
     })
 }
 

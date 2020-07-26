@@ -7,21 +7,25 @@ global.window = document.defaultView
 global.navigator = window.navigator
 
 const Storage = require('dom-storage')
-const localStorage = window.localStorage = global.localStorage = new Storage(null, { strict: true })
+const localStorage = (window.localStorage = global.localStorage = new Storage(
+  null,
+  { strict: true }
+))
 const path = require('path')
 const TestDummy = require('../fixtures/TestDummy')
 const os = require('os')
 const faker = require('faker')
 const fs = require('fs')
+const sander = require('sander')
 
 const storagePath = path.join(os.tmpdir(), 'test/export-note')
 
-test.beforeEach((t) => {
+test.beforeEach(t => {
   t.context.storage = TestDummy.dummyStorage(storagePath)
   localStorage.setItem('storages', JSON.stringify([t.context.storage.cache]))
 })
 
-test.serial('Export a folder', (t) => {
+test.serial('Export a folder', t => {
   const storageKey = t.context.storage.cache.key
   const folderKey = t.context.storage.json.folders[0].key
 
@@ -36,27 +40,42 @@ test.serial('Export a folder', (t) => {
   const input2 = {
     type: 'SNIPPET_NOTE',
     description: 'Some normal text',
-    snippets: [{
-      name: faker.system.fileName(),
-      mode: 'text',
-      content: faker.lorem.lines()
-    }],
+    snippets: [
+      {
+        name: faker.system.fileName(),
+        mode: 'text',
+        content: faker.lorem.lines()
+      }
+    ],
     tags: faker.lorem.words().split(' '),
     folder: folderKey
   }
   input2.title = 'input2'
 
+  const config = {
+    export: {
+      metadata: 'DONT_EXPORT',
+      variable: 'boostnote',
+      prefixAttachmentFolder: false
+    }
+  }
+
   return createNote(storageKey, input1)
-    .then(function () {
+    .then(function() {
       return createNote(storageKey, input2)
     })
-    .then(function () {
-      return exportFolder(storageKey, folderKey, 'md', storagePath)
+    .then(function() {
+      return exportFolder(storageKey, folderKey, 'md', storagePath, config)
     })
-    .then(function assert () {
+    .then(function assert() {
       let filePath = path.join(storagePath, 'input1.md')
       t.true(fs.existsSync(filePath))
       filePath = path.join(storagePath, 'input2.md')
       t.false(fs.existsSync(filePath))
     })
+})
+
+test.after.always(function after() {
+  localStorage.clear()
+  sander.rimrafSync(storagePath)
 })

@@ -1,10 +1,9 @@
 # Build
 
 ## 환경
-* npm: 4.x
-* node: 7.x
 
-`$ grunt pre-build`를 `npm v5.x`에서 실행할 수 없기 때문에, 반드시 `npm v4.x`를 사용하셔야 합니다.
+* npm: 6.x
+* node: 8.x
 
 ## 개발
 
@@ -20,21 +19,41 @@ $ yarn
 그 다음, 아래의 명령으로 빌드를 끝내고 자동적으로 어플리케이션을 실행합니다.
 
 ```
-$ yarn run dev-start
+$ yarn run dev
 ```
-
-이 명령은 `yarn run webpack` 과 `yarn run hot`을 동시에 실행합니다. 이는 두개의 터미널에서 각각의 명령을 동시에 실행하는 것과 같습니다.
-
-`Webpack`은 코드의 변화를 자동으로 탐지하여 적용시키는 역할을 합니다.
-
-만약, `Failed to load resource: net::ERR_CONNECTION_REFUSED`과 같은 에러가 나타난다면 Boostnote를 리로드해주세요.
-
-![net::ERR_CONNECTION_REFUSED](https://cloud.githubusercontent.com/assets/11307908/24343004/081e66ae-1279-11e7-8d9e-7f478043d835.png)
 
 > ### 주의
 > 가끔 직접 리프레쉬를 해주어야 하는 경우가 있습니다.
 > 1. 콤포넌트의 컨스트럭터 함수를 수정할 경우
 > 2. 새로운 CSS코드를 추가할 경우(1.과 같은 이유: CSS클래스는 콤포넌트마다 다시 만들어 지는데, 이 작업은 컨스트럭터에서 일어납니다.)
+
+## Pull Request에 사용된 코드를 적용하는 방법
+관련된 Pull request 페이지를 방문하여, url 스트링 마지막에 표기된 PR 번호를 확인합니다.
+<pre>
+https://github.com/BoostIO/Boostnote/pull/2794
+</pre>
+아래의 커맨드를 실행하면서, \<PR> 대신에 위에서 확인한 번호를 입력합니다 (부등호 신호는 빼고 입력하세요).
+위에 보여진 예시의 경우, \<PR> 자리에 2794를 입력하면 됩니다.
+
+_본인의 로컬 컴퓨터에 마스터 브랜치가 복사되어 있지 않은 경우_
+```
+git clone https://github.com/BoostIO/Boostnote.git
+cd Boostnote
+git fetch origin pull/<PR>/head:<PR>
+git checkout <PR>
+```
+
+_이미 마스터 브랜치를 로컬 컴퓨터에 저장해둔 경우_
+```
+git fetch origin pull/<PR>/head:<PR>
+git checkout <PR>
+```
+
+_To compile and run the code_
+```
+yarn
+yarn run dev
+```
 
 ## 배포
 
@@ -43,8 +62,6 @@ Boostnote에서는 배포 자동화를 위하여 그런트를 사용합니다.
 
 그래서, 실행파일만을 만드는 스크립트를 준비해 뒀습니다.
 
-이 빌드는 npm v5.3.0에서는 작동하지 않습니다. 그러므로, 성공적으로 빌드하기 위해서는 v5.2.0을 사용해야 합니다.
-
 ```
 grunt pre-build
 ```
@@ -52,3 +69,31 @@ grunt pre-build
 실행 파일은 `dist`에서 찾을 수 있습니다. 이 경우, 인증이 되어있지 않기 때문에 업데이터는 사용할 수 없습니다.
 
 필요로 하다면, 이 실행파일에 Codesign나 Authenticode등의 서명을 할 수 있습니다.
+
+## 독자적인 배포판을 제작하는 방법 (deb, rpm)
+
+배포판 패키지를 제작하려면 (우분투, 페도라 등) 리눅스 플랫폼에서 `grunt build` 커맨드를 실행하면 됩니다.
+
+> 참조: 동일한 환경에서 `.deb` 파일과 `.rpm` 파일을 모두 만들 수 있습니다.
+
+지원되는 버전의 `node`와 `npm`을 설치한 다음, 빌드에 필요한 패키지를 설치합니다.
+
+우분투/데비안 환경 (Ubuntu/Debian):
+
+```
+$ sudo apt-get install -y rpm fakeroot
+```
+
+페도라 환경 (Fedora):
+
+```
+$ sudo dnf install -y dpkg dpkg-dev rpm-build fakeroot
+```
+
+그 다음 `grunt build` 커맨드를 실행합니다.
+
+```
+$ grunt build
+```
+
+`dist` 디렉토리에 `.deb` 파일과 `.rpm` 파일이 새롭게 생성됩니다.

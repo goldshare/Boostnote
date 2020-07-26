@@ -22,7 +22,7 @@ if (!getSendEventCond()) {
   })
 }
 
-function convertPlatformName (platformName) {
+function convertPlatformName(platformName) {
   if (platformName === 'darwin') {
     return 'MacOS'
   } else if (platformName === 'win32') {
@@ -34,36 +34,35 @@ function convertPlatformName (platformName) {
   }
 }
 
-function getSendEventCond () {
+function getSendEventCond() {
   const isDev = process.env.NODE_ENV !== 'production'
   const isDisable = !ConfigManager.default.get().amaEnabled
   const isOffline = !window.navigator.onLine
   return isDev || isDisable || isOffline
 }
 
-function initAwsMobileAnalytics () {
+function initAwsMobileAnalytics() {
   if (getSendEventCond()) return
-  AWS.config.credentials.get((err) => {
+  AWS.config.credentials.get(err => {
     if (!err) {
-      console.log('Cognito Identity ID: ' + AWS.config.credentials.identityId)
       recordDynamicCustomEvent('APP_STARTED')
       recordStaticCustomEvent()
     }
   })
 }
 
-function recordDynamicCustomEvent (type, options = {}) {
+function recordDynamicCustomEvent(type, options = {}) {
   if (getSendEventCond()) return
   try {
     mobileAnalyticsClient.recordEvent(type, options)
   } catch (analyticsError) {
     if (analyticsError instanceof ReferenceError) {
-      console.log(analyticsError.name + ': ' + analyticsError.message)
+      console.error(analyticsError.name + ': ' + analyticsError.message)
     }
   }
 }
 
-function recordStaticCustomEvent () {
+function recordStaticCustomEvent() {
   if (getSendEventCond()) return
   try {
     mobileAnalyticsClient.recordEvent('UI_COLOR_THEME', {
@@ -71,7 +70,7 @@ function recordStaticCustomEvent () {
     })
   } catch (analyticsError) {
     if (analyticsError instanceof ReferenceError) {
-      console.log(analyticsError.name + ': ' + analyticsError.message)
+      console.error(analyticsError.name + ': ' + analyticsError.message)
     }
   }
 }
